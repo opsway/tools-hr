@@ -22,10 +22,12 @@ function deleteTeam($client, $githubOrg, $tempRepoName) {
 }
 
 function createRepoAndPutFiles($client, $tempRepoName, $githubOrg, $githubTasksRepo) {
-	// $client->api('repo')->create($tempRepoName, 'Temporary repo for HR test', '', false, $githubOrg);
-	$tree = $client->api('git_data')->trees($githubOrg,$githubTasksRepo,'8e51dae8e8baf2614c6e6a0dac803e95b9e7a773');
-	echo($tree);
-	die;
+	$client->api('repo')->create($tempRepoName, 'Temporary repo for HR test', '', false, $githubOrg);
+	$result = $client->api('git_data')->trees()->show($githubOrg,$githubTasksRepo,'master');
+	foreach ($result['tree'] as $file) {
+		$content = $client->api('repo')->contents()->show($githubOrg,$githubTasksRepo,$file['path'],'master');
+		$client->api('repo')->contents()->create($githubOrg, $tempRepoName, $file['path'], base64_decode($content['content']), "Auto-created for HR test");
+	}
 }
 
 if (count($argv) != 3) {
