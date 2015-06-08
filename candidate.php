@@ -32,7 +32,7 @@ function createRepoAndPutFiles($client, $tempRepoName, $githubOrg, $githubTasksR
 if (count($argv) != 3) {
 	echo "Usage: php candidate.php type create/delete githublogin\n";
 	echo "example: php candidate.php php delete githublogin\n";
-	echo "type = php or frontend\n"
+	echo "type = php or frontend\n";
 	die;
 }
 
@@ -51,10 +51,9 @@ switch ($type) {
 		break;
 	
 	case 'frontend':
-		$githubTasksRepo = "hr_test_frontend";
+		$githubTasksRepo = "hr_frontend_test";
 		break;
 }
-$githubTasksRepo = 
 
 switch ($action) {
  	case 'create':
