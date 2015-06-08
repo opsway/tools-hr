@@ -6,7 +6,6 @@ Example
 
 $githubToken	 = "d123178833fa00328d9a33dfb3450123123123";
 $githubOrg	 = "opsway";
-$githubTasksRepo = "hr-test"
 */
 require_once 'vendor/autoload.php';
 require_once 'github.conf.php';
@@ -31,18 +30,31 @@ function createRepoAndPutFiles($client, $tempRepoName, $githubOrg, $githubTasksR
 }
 
 if (count($argv) != 3) {
-	echo "Usage: php candidate.php create githublogin\n";
-	echo "OR php candidate.php delete githublogin\n";
+	echo "Usage: php candidate.php type create/delete githublogin\n";
+	echo "example: php candidate.php php delete githublogin\n";
+	echo "type = php or frontend\n"
 	die;
 }
 
-$action 		 = trim($argv[1]);
-$candidateGithub = trim($argv[2]);
+$type			 = trim($argv[1]);
+$action 		 = trim($argv[2]);
+$candidateGithub = trim($argv[3]);
 
 $client 		 = new \Github\Client();
 $client->authenticate($githubToken, "", \Github\Client::AUTH_HTTP_TOKEN);
 $candidate = $client->api('user')->show($candidateGithub);
 $tempRepoName = "hr_test_" . (urlencode($candidateGithub));
+
+switch ($type) {
+	case 'php':
+		$githubTasksRepo = "hr-test";
+		break;
+	
+	case 'frontend':
+		$githubTasksRepo = "hr_test_frontend";
+		break;
+}
+$githubTasksRepo = 
 
 switch ($action) {
  	case 'create':
