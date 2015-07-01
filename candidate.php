@@ -20,16 +20,20 @@ function deleteTeam($client, $githubOrg, $tempRepoName) {
 	$client->api('teams')->remove($teamToDeleteId);
 }
 
-function createRepoAndPutFiles($client, $tempRepoName, $githubOrg, $githubTasksRepo) {
-	$client->api('repo')->create($tempRepoName, 'Temporary repo for HR test', '', false, $githubOrg);
-	$result = $client->api('git_data')->trees()->show($githubOrg,$githubTasksRepo,'master');
-	foreach ($result['tree'] as $file) {
-		$content = $client->api('repo')->contents()->show($githubOrg,$githubTasksRepo,$file['path'],'master');
-		$client->api('repo')->contents()->create($githubOrg, $tempRepoName, $file['path'], base64_decode($content['content']), "Auto-created for HR test");
-	}
+function createRepoAndPutFiles($client, $tempRepoName, $githubOrg, $githubTasksRepo, $type) {
+	$client->api('repo')->create($tempRepoName, 'Temporary repo for HR test', '', true, $githubOrg);
+    if ($type != 'php') {
+        $result = $client->api('git_data')->trees()->show($githubOrg, $githubTasksRepo, 'master');
+        foreach ($result['tree'] as $file) {
+            $content = $client->api('repo')->contents()->show($githubOrg, $githubTasksRepo, $file['path'], 'master');
+            $client->api('repo')->contents()
+                ->create($githubOrg, $tempRepoName, $file['path'], base64_decode($content['content']),
+                    "Auto-created for HR test");
+        }
+    }
 }
 
-if (count($argv) != 3) {
+if (count($argv) != 4) {
 	echo "Usage: php candidate.php type create/delete githublogin\n";
 	echo "example: php candidate.php php delete githublogin\n";
 	echo "type = php or frontend\n";
@@ -47,20 +51,31 @@ $tempRepoName = "hr_test_" . (urlencode($candidateGithub));
 
 switch ($type) {
 	case 'php':
-		$githubTasksRepo = "hr-test";
+		$githubTasksRepo = "hr_php_test";
 		break;
 	
 	case 'frontend':
 		$githubTasksRepo = "hr_frontend_test";
 		break;
+
+    default:
+        die('Wrong type test.'.PHP_EOL);
+        break;
 }
 
 switch ($action) {
  	case 'create':
- 		createRepoAndPutFiles($client, $tempRepoName, $githubOrg,$githubTasksRepo);
+ 		createRepoAndPutFiles($client, $tempRepoName, $githubOrg,$githubTasksRepo, $type);
 		$newTeam = $client->api('teams')->create($githubOrg, array('name' => $tempRepoName, 'permission' => 'push'));
 		$client->api('teams')->addRepository($newTeam['id'], $githubOrg, $tempRepoName);
 		$client->api('teams')->addMember($newTeam['id'], $candidateGithub);
+        if (isset($jenkins_hook_url) && $jenkins_hook_url != '' && $type == 'php') {
+            foreach ($jenkinsGithub as $user) {
+                $client->api('teams')->addMember($newTeam['id'], $user);
+            }
+            $client->api('repo')->hooks()->create($githubOrg, $tempRepoName,
+                array('name' => 'jenkins', 'config' => array('jenkins_hook_url' => $jenkins_hook_url), 'active' => true));
+        }
 		echo "User $candidateGithub added to team with access to $tempRepoName\n";
 		break;
 	case 'delete':
