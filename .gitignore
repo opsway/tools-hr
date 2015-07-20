@@ -1,4 +1,6 @@
-github.conf.php
 composer.lock
 composer.phar
 vendor/
+client_secret.json
+config.php
+googleapps-credentials.json

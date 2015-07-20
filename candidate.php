@@ -1,14 +1,7 @@
 <?php
 
-/*
-Requires two variables set, presumably in github.conf.php
-Example
-
-$githubToken	 = "d123178833fa00328d9a33dfb3450123123123";
-$githubOrg	 = "opsway";
-*/
 require_once 'vendor/autoload.php';
-require_once 'github.conf.php';
+require_once 'config.php';
 
 function deleteTeam($client, $githubOrg, $tempRepoName) {
 	$teamToDeleteId = '';
@@ -33,6 +26,7 @@ function createRepoAndPutFiles($client, $tempRepoName, $githubOrg, $githubTasksR
     }
 }
 
+
 if (count($argv) != 4) {
 	echo "Usage: php candidate.php type create/delete githublogin\n";
 	echo "example: php candidate.php php delete githublogin\n";
@@ -45,7 +39,7 @@ $action 		 = trim($argv[2]);
 $candidateGithub = trim($argv[3]);
 
 $client 		 = new \Github\Client();
-$client->authenticate($githubToken, "", \Github\Client::AUTH_HTTP_TOKEN);
+$client->authenticate($config['github']['token'], "", \Github\Client::AUTH_HTTP_TOKEN);
 $candidate = $client->api('user')->show($candidateGithub);
 $tempRepoName = "hr_test_" . (urlencode($candidateGithub));
 
@@ -65,25 +59,25 @@ switch ($type) {
 
 switch ($action) {
  	case 'create':
- 		createRepoAndPutFiles($client, $tempRepoName, $githubOrg,$githubTasksRepo, $type);
-		$newTeam = $client->api('teams')->create($githubOrg, array('name' => $tempRepoName, 'permission' => 'push'));
-		$client->api('teams')->addRepository($newTeam['id'], $githubOrg, $tempRepoName);
+ 		createRepoAndPutFiles($client, $tempRepoName, $config['github']['org'], $githubTasksRepo, $type);
+		$newTeam = $client->api('teams')->create($config['github']['org'], array('name' => $tempRepoName, 'permission' => 'push'));
+		$client->api('teams')->addRepository($newTeam['id'], $config['github']['org'], $tempRepoName);
 		$client->api('teams')->addMember($newTeam['id'], $candidateGithub);
-        if (isset($jenkins_hook_url) && $jenkins_hook_url != '' && $type == 'php') {
+        if (isset($config['github']['jenkins_hook_url']) && $config['github']['jenkins_hook_url'] != '' && $type == 'php') {
             foreach ($jenkinsGithub as $user) {
                 $client->api('teams')->addMember($newTeam['id'], $user);
             }
-            $client->api('repo')->hooks()->create($githubOrg, $tempRepoName,
+            $client->api('repo')->hooks()->create($config['github']['org'], $tempRepoName,
                 array('name' => 'jenkins', 'config' => array('jenkins_hook_url' => $jenkins_hook_url), 'active' => true));
         }
 		echo "User $candidateGithub added to team with access to $tempRepoName\n";
 		break;
 	case 'delete':
 		try {
-			$client->api('repo')->remove($githubOrg, $tempRepoName);
+			$client->api('repo')->remove($config['github']['org'], $tempRepoName);
 		} catch (Exception $e) {}
 		try {
-			deleteTeam($client, $githubOrg, $tempRepoName);
+			deleteTeam($client, $config['github']['org'], $tempRepoName);
 		} catch (Exception $e) {}
 		echo "Deleted team and repo $tempRepoName\n";
 		break;
