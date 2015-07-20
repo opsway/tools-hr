@@ -31,7 +31,7 @@ function createUser($config, $params) {
     curl_close($ch);
 
     var_dump($http_result);
-    if ($error) {
+    if ($http_code !="201" || $error) {
       throw new Exception('Can not create user in OneLogin');
     }   
     
@@ -65,15 +65,12 @@ function addRoles($config, $params) {
         curl_close($ch);
 
         var_dump($http_result);
-        if ($error) {
+        if ($http_code !="304" || $error ) {
           throw new Exception('Can not update user roles in OneLogin');
         }   
         
     }
 }
-
-
-//USER NAME
 
 
 if (count($argv) != 7) {
@@ -96,12 +93,12 @@ $params = array (
         'name' => trim($argv[1]) . " " . trim($argv[2]),
         'opswayLogin' => trim($argv[3]),
         'email' => trim($argv[4]),
-        'password' => trim($argv[5]) 
+        'password' => trim($argv[5])
     );
 
 switch (trim($argv[6])) {
     case 'Engineer':
-        array_push($params['roles'], '52259');
+        $params['roles'] = array('52259');
         break;
     default:
         break;
