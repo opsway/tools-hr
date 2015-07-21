@@ -36,7 +36,7 @@ function createUser($config, $params) {
 						'eid'  		=> $params['opswayLogin'],
 						'status'	=> 1,
 						'group'		=> 5,
-						'email'		=> 'test@opsway.com',
+						'email'		=> $params['email'],
 						'nick_name' => $params['opswayLogin'],
 						'cell_phone'=> $params['cellphone'],
 						'username'  => $params['opswayLogin']
