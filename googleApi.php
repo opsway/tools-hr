@@ -98,7 +98,7 @@ function deleteGroup() {
 }
 
 if (count($argv) != 5) {
-    echo "Usage: php hipchatApi.php FirstName LastName email@opsway.com oldemail@mail.com\n";
+    echo "Usage: php googleApi.php FirstName LastName email@opsway.com oldemail@mail.com\n";
     die;
 }
 

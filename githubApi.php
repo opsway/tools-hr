@@ -8,7 +8,7 @@ function addUserToSupportEngineersGroup($config, $params) {
 	$client->authenticate($config['github']['token'], "", \Github\Client::AUTH_HTTP_TOKEN);
 	// support-engineers team id, 
 	// retrieved with request $supportTeam = $client->api('teams')->all('opsway');
-	$client->api('teams')->addMember('527996', '');	
+	$client->api('teams')->addMember('527996', $params['githubLogin']);	
 }
 
 if (count($argv) != 2) {
@@ -16,4 +16,8 @@ if (count($argv) != 2) {
 	die;
 }
 
-addUserToSupportEngineersGroup($config, array('githubLogin' => trim(argv[1])));
+$params = array(
+		'githubLogin' => trim($argv[1])
+	);
+
+addUserToSupportEngineersGroup($config, $params);

@@ -65,7 +65,8 @@ function addRoles($config, $params) {
         curl_close($ch);
 
         var_dump($http_result);
-        if ($http_code !="304" || $error ) {
+        if (!($http_code == "303" || $http_code == "304")
+            || $error ) {
           throw new Exception('Can not update user roles in OneLogin');
         }   
         
