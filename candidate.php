@@ -64,11 +64,11 @@ switch ($action) {
 		$client->api('teams')->addRepository($newTeam['id'], $config['github']['org'], $tempRepoName);
 		$client->api('teams')->addMember($newTeam['id'], $candidateGithub);
         if (isset($config['github']['jenkins_hook_url']) && $config['github']['jenkins_hook_url'] != '' && $type == 'php') {
-            foreach ($jenkinsGithub as $user) {
+            foreach ($config['github']['jenkinsGithub'] as $user) {
                 $client->api('teams')->addMember($newTeam['id'], $user);
             }
             $client->api('repo')->hooks()->create($config['github']['org'], $tempRepoName,
-                array('name' => 'jenkins', 'config' => array('jenkins_hook_url' => $jenkins_hook_url), 'active' => true));
+                array('name' => 'jenkins', 'config' => array('jenkins_hook_url' => $config['github']['jenkins_hook_url']), 'active' => true));
         }
 		echo "User $candidateGithub added to team with access to $tempRepoName\n";
 		break;
