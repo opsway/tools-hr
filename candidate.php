@@ -60,26 +60,27 @@ switch ($type) {
 switch ($action) {
  	case 'create':
  		createRepoAndPutFiles($client, $tempRepoName, $config['github']['org'], $githubTasksRepo, $type);
-		$newTeam = $client->api('teams')->create($config['github']['org'], array('name' => $tempRepoName, 'permission' => 'push'));
-		$client->api('teams')->addRepository($newTeam['id'], $config['github']['org'], $tempRepoName);
-		$client->api('teams')->addMember($newTeam['id'], $candidateGithub);
-        if (isset($config['github']['jenkins_hook_url']) && $config['github']['jenkins_hook_url'] != '' && $type == 'php') {
-            foreach ($config['github']['jenkinsGithub'] as $user) {
-                $client->api('teams')->addMember($newTeam['id'], $user);
-            }
+//		$newTeam = $client->api('teams')->create($config['github']['org'], array('name' => $tempRepoName, 'permission' => 'push'));
+//		$client->api('teams')->addRepository($newTeam['id'], $config['github']['org'], $tempRepoName);
+//		$client->api('teams')->addMember($newTeam['id'], $candidateGithub);
+		$client->api('repo')->collaborators()->add($config['github']['org'],$tempRepoName,$candidateGithub);
+		if (isset($config['github']['jenkins_hook_url']) && $config['github']['jenkins_hook_url'] != '' && $type == 'php') {
+//            foreach ($config['github']['jenkinsGithub'] as $user) {
+//                $client->api('teams')->addMember($newTeam['id'], $user);
+//            }
             $client->api('repo')->hooks()->create($config['github']['org'], $tempRepoName,
                 array('name' => 'jenkins', 'config' => array('jenkins_hook_url' => $config['github']['jenkins_hook_url']), 'active' => true));
         }
-		echo "User $candidateGithub added to team with access to $tempRepoName\n";
+		echo "User $candidateGithub added to collaborators with access to $tempRepoName\n";
 		break;
 	case 'delete':
 		try {
 			$client->api('repo')->remove($config['github']['org'], $tempRepoName);
 		} catch (Exception $e) {}
-		try {
-			deleteTeam($client, $config['github']['org'], $tempRepoName);
-		} catch (Exception $e) {}
-		echo "Deleted team and repo $tempRepoName\n";
+//		try {
+//			deleteTeam($client, $config['github']['org'], $tempRepoName);
+//		} catch (Exception $e) {}
+		echo "Deleted repo $tempRepoName\n";
 		break;
  	default:
  		echo "No action $action found";
